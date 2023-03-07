@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Services\RestCountriesService;
+use Illuminate\Support\Facades\Validator;
 
 class UsuarioController extends Controller
 {
@@ -45,12 +46,24 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         $user = request()->except('_token');
+        $validator = Validator::make($request->all(), [
+            'cedula' => 'required',
+            'nombres' => ['required', 'string', 'min:5', 'max:100', 'regex:/^[a-zA-Z\s]+$/'],
+            'apellidos' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email',  'max:150'],
+            'direccion' => ['required', 'string',  'max:180'],
+            'celular' => ['required', 'numeric', 'regex:/^\d+$/'],
+        ]);
 
-        if ((Usuario::where('cedula', $request->cedula)->exists()) || (Usuario::where('email', $request->email)->exists())) {
-            Alert::warning('El Usuario ya existe');
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
         } else {
-            Usuario::insert($user);
-            Alert::success('Usuario registrado correctamente');
+            if ((Usuario::where('cedula', $request->cedula)->exists()) || (Usuario::where('email', $request->email)->exists())) {
+                Alert::warning('El Usuario ya existe');
+            } else {
+                Usuario::insert($user);
+                Alert::success('Usuario registrado correctamente');
+            }
         }
         return redirect(route('usuarios.index'));
     }
