@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Services\RestCountriesService;
 use Illuminate\Support\Facades\Validator;
+use App\Mail\NewUserNotification;
+use Illuminate\Support\Facades\Mail;
 
 class UsuarioController extends Controller
 {
@@ -63,6 +65,7 @@ class UsuarioController extends Controller
             } else {
                 Usuario::insert($user);
                 Alert::success('Usuario registrado correctamente');
+                //Mail::to($request->get('email'))->send(new NewUserNotification($user));
             }
         }
         return redirect(route('usuarios.index'));
